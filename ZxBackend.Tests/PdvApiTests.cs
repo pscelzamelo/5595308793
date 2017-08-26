@@ -12,8 +12,7 @@ namespace ZxBackend.Tests
         public void TestCreatePdvInvalidId()
         {
             //Arrange
-            var cache = new MemoryCache(new MemoryCacheOptions());
-            var controller = new PdvController(cache);
+            var controller = InstantiateController();
             var obj = MockValidPdv();
             obj["id"] = null;
 
@@ -23,6 +22,55 @@ namespace ZxBackend.Tests
             // Assert
             Assert.IsFalse(response.Success);
             Assert.IsTrue(response.Errors.Count > 0);
+        }
+
+
+        [TestMethod]
+        public void TestCreatePdvNotUniqueCNPJ()
+        {
+            //Arrange
+            var controller = InstantiateController();
+            var obj = MockValidPdv();
+            obj["document"] = "02.453.716/000170";
+
+            // Act
+            var response = controller.Post(obj);
+
+            // Assert
+            Assert.IsFalse(response.Success);
+            Assert.IsTrue(response.Errors.Count > 0);
+        }
+
+        [TestMethod]
+        public void TestCreatePdvEmptyAddress()
+        {
+            //Arrange
+            var controller = InstantiateController();
+            var obj = MockValidPdv();
+            obj["address"] = null;
+
+            // Act
+            var response = controller.Post(obj);
+
+            // Assert
+            Assert.IsFalse(response.Success);
+            Assert.IsTrue(response.Errors.Count > 0);
+        }
+
+
+        [TestMethod]
+        public void TestCreatePdvSuccess()
+        {
+            //Arrange
+            var controller = InstantiateController();
+            var obj = MockValidPdv();
+
+            // Act
+            var response = controller.Post(obj);
+
+            // Assert
+            Assert.IsTrue(response.Success);
+            Assert.IsTrue(response.Errors.Count == 0);
         }
 
         private JObject MockValidPdv()
@@ -46,5 +94,13 @@ namespace ZxBackend.Tests
 	            ""deliveryCapacity"": 5
             }");
         }
+
+        private static PdvController InstantiateController()
+        {
+            var cache = new MemoryCache(new MemoryCacheOptions());
+            var controller = new PdvController(cache);
+            return controller;
+        }
+
     }
 }
