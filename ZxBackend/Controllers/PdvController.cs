@@ -71,6 +71,40 @@ namespace ZxBackend.Controllers
                 return new CommandResponse(true, pdv);
             }
         }
+        
+        [HttpGet("closest")]
+        public JObject Closest()
+        {
+            JObject result = null;
+
+            //Read data from querystring
+            string latitude = Request.Query["lat"];
+            string longitude = Request.Query["lon"];
+            if (string.IsNullOrEmpty(latitude) || string.IsNullOrEmpty(longitude)) return result; //TODO: better error handling
+            double lat, lon;
+            lat = double.Parse(latitude);
+            lon = double.Parse(longitude);
+            var testPoint = new Point(new Position(lat, lon));
+
+            //Query PDV's to find the closest
+            var pdvs = GetPdvs();
+            foreach (JObject pdv in pdvs)
+            {
+                var address = JsonConvert.DeserializeObject<Point>(pdv["address"]?.ToString());
+                var distance = GeoUtils.GetDistance(address, testPoint);
+                if (result == null || (double)result["distance"] > distance)
+                {
+                    var coverageArea = JsonConvert.DeserializeObject<MultiPolygon>(pdv["coverageArea"]?.ToString());
+                    if (GeoUtils.IsPointInMultiPolygon(testPoint, coverageArea))
+                    {
+                        pdv["distance"] = distance;
+                        result = pdv;
+                    }
+                }
+            }
+
+            return result;
+        }
 
         private JArray GetPdvs()
         {

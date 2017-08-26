@@ -11,7 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/pdv",
+      "launchUrl": "api/pdv/closest?lon=-43,297355&lat=-23,013529",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
