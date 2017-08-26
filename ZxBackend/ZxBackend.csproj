@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Views\Home\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Update="pdvs.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
