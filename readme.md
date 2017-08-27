@@ -36,7 +36,7 @@ Para executar os testes, **dotnet test ZxBackend.Tests/ZxBackend.Tests.csproj**:
 
 Outra forma de executar os testes é via Visual Studio na aba Test Explorer:
 
-![Dotnet test](/Documentation/testexplorer.PNG)
+![Dotnet test](/Documentation/testexplorer.png)
 
 Deploys podem ser feitos via Visual Studio (botão direito no projeto > Publish) ou via commits nos branchs plugados no CI/CD do Team Services. 
 
@@ -82,4 +82,11 @@ Finalizando, acho interessante enumerar que dentre os componentes utilizados, to
 
 ## Bonus: Docker
 
-Por tratar a maior parte do meu tempo de aplicações .Net em ambiente windows, o caminho mais óbvio foi naturalmente apresentar uma solução .Net com recursos do Azure. Ciente de que na Zx a stack é baseada em Python e sem Windows, achei que seria válido aproveitar a possibilidade do .Net Core de rodar em Linux para realizar testes rodando a aplicação desenvolvida em containers Docker. 
+Por tratar a maior parte do meu tempo de aplicações .Net em ambiente windows, o caminho mais óbvio foi naturalmente apresentar uma solução .Net com recursos do Azure. Ciente de que na Zx a stack é baseada em Python e sem Windows, achei que seria válido aproveitar a possibilidade do .Net Core de rodar em Linux para realizar testes rodando a aplicação desenvolvida em containers Docker. Para minha surpresa, o Visual Studio Community 2017 possui um recurso para adicionar os arquivos necessários para executar em Docker à uma solution existente:
+
+![Dotnet test](/Documentation/docker-files-generation.PNG)
+
+Após a criação dos arquivos, é acrescento à solution um Projeto Docker, onde na sua build ele executa o docker-compose e prepara os containers:
+
+![Dotnet test](/Documentation/docker-build.PNG)
+
