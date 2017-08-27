@@ -1,7 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using ZxBackend.Controllers;
+using ZxBackend.Data;
 
 namespace ZxBackend.Tests
 {
@@ -23,24 +25,7 @@ namespace ZxBackend.Tests
             Assert.IsFalse(response.Success);
             Assert.IsTrue(response.Errors.Count > 0);
         }
-
-
-        [TestMethod]
-        public void TestCreatePdvNotUniqueCNPJ()
-        {
-            //Arrange
-            var controller = InstantiateController();
-            var obj = MockValidPdv();
-            obj["document"] = "02.453.716/000170";
-
-            // Act
-            var response = controller.Post(obj);
-
-            // Assert
-            Assert.IsFalse(response.Success);
-            Assert.IsTrue(response.Errors.Count > 0);
-        }
-
+        
         [TestMethod]
         public void TestCreatePdvEmptyAddress()
         {
@@ -98,7 +83,10 @@ namespace ZxBackend.Tests
         private static PdvController InstantiateController()
         {
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var controller = new PdvController(cache);
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.UseInMemoryDatabase("zxbackendinmemorydb");
+            var db = new AppDbContext(optionsBuilder.Options);
+            var controller = new PdvController(cache,db);
             return controller;
         }
 
