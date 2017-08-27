@@ -82,11 +82,22 @@ Finalizando, acho interessante enumerar que dentre os componentes utilizados, to
 
 ## Bonus: Docker
 
-Por tratar a maior parte do meu tempo de aplicações .Net em ambiente windows, o caminho mais óbvio foi naturalmente apresentar uma solução .Net com recursos do Azure. Ciente de que na Zx a stack é baseada em Python e sem Windows, achei que seria válido aproveitar a possibilidade do .Net Core de rodar em Linux para realizar testes rodando a aplicação desenvolvida em containers Docker. Para minha surpresa, o Visual Studio Community 2017 possui um recurso para adicionar os arquivos necessários para executar em Docker à uma solution existente:
+Por tratar a maior parte do meu tempo de aplicações .Net em ambiente windows, o caminho mais óbvio foi naturalmente apresentar uma solução .Net com recursos do Azure. Ciente de que na Zx a stack é baseada em Python e sem Windows, achei que seria válido aproveitar a possibilidade do .Net Core de rodar em Linux para realizar testes rodando a aplicação desenvolvida em containers Docker. Para minha surpresa, o Visual Studio Community 2017 possui um recurso para adicionar à uma solution existente os arquivos necessários para subir os containers e executa a aplicação finalmente em Docker :
 
 ![Dotnet test](/Documentation/docker-files-generation.PNG)
 
-Após a criação dos arquivos, é acrescento à solution um Projeto Docker, onde na sua build ele executa o docker-compose e prepara os containers:
+Após a criação dos arquivos, é acrescentado à solution um Projeto Docker, onde na sua build ele executa o docker-compose e prepara os containers:
 
 ![Dotnet test](/Documentation/docker-build.PNG)
 
+Clicando em run, os containers sobem:
+
+![Dotnet test](/Documentation/app-rodando-docker.PNG)
+
+*Disclaimer: Não tenho muita experiência com docker. Já fiz uso no passado para provas de conceito mas novamente, por estar "preso" em soluções Windows e IIS, nunca me aprofundei nos estudos, muito embora gostaria muito!!!*
+
+## Troubleshooting
+
+O ambiente onde executei, testei e tirei os prints trata-se de Windows 10, com o Visual Studio 2017 Community e o .Net Core 2.0.0 instalados apenas. 
+
+Desconfio que eventualmente um "dotnet run" numa máquina Linux não vá rodar de primeira por padrão, já que o ambiente de desenvolvimento faz uso do SQL Server LocalDb. Em Linux entendo que rodaria na configuração de Production, muito embora não tive oportunidade de testar. Igualmente para os containers docker.
