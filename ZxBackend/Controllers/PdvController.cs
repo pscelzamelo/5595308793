@@ -73,11 +73,11 @@ namespace ZxBackend.Controllers
                 var pdv = new Pdv()
                 {
                     Id = 0, // Avoid explict id inserting in identity column
-                    TradingName = (string)item["tradingName"],
-                    OwnerName = (string)item["ownerName"],
-                    Document = (string)item["document"],
-                    CoverageArea = (string)item["coverageArea"],
-                    Address = (string)item["address"],
+                    TradingName = item["tradingName"].ToString(),
+                    OwnerName = item["ownerName"].ToString(),
+                    Document = item["document"].ToString(),
+                    CoverageArea = item["coverageArea"].ToString(),
+                    Address = item["address"].ToString(),
                 };
                 pdvs.ToList().Add(pdv);
                 _cache.Set(_pdvsCacheKey,pdvs);
