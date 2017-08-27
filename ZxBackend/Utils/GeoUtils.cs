@@ -8,7 +8,7 @@ namespace ZxBackend.Utils
 {
     public static class GeoUtils
     {
-        internal static bool IsPointInMultiPolygon(Point testPoint, MultiPolygon coverageArea)
+        public static bool IsPointInMultiPolygon(Point testPoint, MultiPolygon coverageArea)
         {
             foreach (Polygon polygon in coverageArea.Coordinates)
             {
