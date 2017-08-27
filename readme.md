@@ -54,3 +54,32 @@ No branch master, pluguei um processo de build que gera o pacote para deploy ime
 
 ![Dotnet test](/Documentation/production-build-definition.PNG)
 
+## Sobre o código
+
+Parti do template de Web Api do .Net Core, criando o **ZxVentures\Controllers\PdvController.cs** para abrigar a API, e o **ZxVentures\Utils\GeoUtils.cs** para abrigar a lógica referente à geolocalização. No PdvController são injetadas dependências para acesso a cache e banco de dados via construtor e o framework de DI nativo do .Net Core.
+
+Para acesso a dados, fiz uso do Entity Framework, um ORM nativo do .Net que uso extensivamente há anos. A classe **ZxVentures\Data\AppDbContext.cs** define o contexto, a **ZxVentures\Data\DbInitializer.cs** contém a lógica de inicialização da banco - carga a partir do json fornecido, e os controllers chamam as propriedades do contexto diretamente para acesso fisico às tabelas. 
+
+Para os testes, como as dependências são injetadas via construtor, mockar o contexto é muito simples. Essa versão mais recente do EntityFramework possui ainda uma maneira trivial de orientá-lo a fazer uso de persistência em memória, o que permite subir um contexto temporário executando minha lógica de inicialização do banco inclusive:
+
+![Dotnet test](/Documentation/mockup-banco.PNG)
+
+As strings de conexão de banco estão em **ZxVentures\appsettings.json**, **ZxVentures\appsettings.Development.json** e **ZxVentures\appsettings.Production.json**. Conforme o ambiente em que a aplicação roda, o .Net Core aplica as transformações dos arquivos filho no arquivo pai, o que permite que eu especifique uma connection string de um banco diferente para o ambiente de produção, por exemplo:
+
+![Dotnet test](/Documentation/connection-strings.PNG)
+
+Nesse caso, no ambiente de desenvolvimento o banco de dados utilizado é o SQL Server LocalDB, versão minimalista do SQL Server que vem shipada com o Visual Studio. Em produção, utilizei um serviço free para testes. Como o DbInitializer cria as tabelas à partir das classes enumeradas no contexto, a implementação foi trivial.
+
+Gosto de basear minhas API's em CQRS (Command and Query Responsibility Segregation), separando as operações que tratam-se de consultas (querys - lista pdv, retorna pdv por id, retorna pdv mais próximo) das operações de comando - operações efetivas nos dados sob gestão (nesse caso, somente criar um novo PDV, que altera meu banco). 
+
+Entendo que o ideal seria segregar os métodos implementando controllers diferentes com dependências diferentes, onde os QueryControllers recebem serviços de cache e acesso a dados somente leitura, e os CommandControllers recebem serviços com privilégios e possuem uma mensageria padrão para retorno,  tornando o uso da API por clientes mais amigável. A classe **ZxVentures\Models\CommandResponse.cs** implementa o padrão de mensagens. A criação de PDV (unico "command" do desafio), retorna sempre uma resposta HTTP 200 mesmo em casos de falha:
+
+![Dotnet test](/Documentation/command-response.PNG)
+
+Apesar de sugerir segregar, mantive tudo junto nesse projeto para não causar estranheza ao padrão RESTful. No mesmo endpoint (url) estão todos os serviços, e a intenção do cliente dentre criar um Pdv ou Listar um Pdv é mencionado via os verbos HTTP - Post e Get.
+
+Finalizando, acho interessante enumerar que dentre os componentes utilizados, todos são nativos do .Net. A única exceção é o componente GeoJson.Net - pacote externo que traz as classes a deserializar do formato GeoJson. No design das minhas soluções, levo em conta sempre as skills do time-alvo a manter o projeto, e tendo acessível via o portal de documentação da Microsoft praticamente tudo de conhecimento necessário para entender a solution, consigo trabalhar com uma gama de senioridades maior e tenho uma curva de aprendizado reduzida. 
+
+## Bonus: Docker
+
+Por tratar a maior parte do meu tempo de aplicações .Net em ambiente windows, o caminho mais óbvio foi naturalmente apresentar uma solução .Net com recursos do Azure. Ciente de que na Zx a stack é baseada em Python e sem Windows, achei que seria válido aproveitar a possibilidade do .Net Core de rodar em Linux para realizar testes rodando a aplicação desenvolvida em containers Docker. 
