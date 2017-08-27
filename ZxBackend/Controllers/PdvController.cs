@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using GeoJSON.Net.Geometry;
 using ZxBackend.Utils;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore;
+using ZxBackend.Data;
 
 namespace ZxBackend.Controllers
 {
@@ -17,65 +19,78 @@ namespace ZxBackend.Controllers
     {
         const string _pdvsCacheKey = "pdvs";
         private IMemoryCache _cache;
+        private AppDbContext _db;
 
-        public PdvController(IMemoryCache memoryCache)
+        public PdvController(IMemoryCache memoryCache,AppDbContext db)
         {
             _cache = memoryCache;
+            _db = db;
         }
         
         // GET api/pdv
         [HttpGet]
-        public JArray Get()
+        public IEnumerable<Pdv> Get()
         {
-            return GetPdvs();
+            return CachedGetPdvs();
         }
 
         // GET api/pdv/5
         [HttpGet("{id}")]
-        public JObject Get(int id)
+        public Pdv Get(int id)
         {
-            var pdvs = GetPdvs();
-            return (JObject)pdvs.FirstOrDefault(x => (int)x["id"] == id);
+            var pdvs = CachedGetPdvs();
+            return pdvs.FirstOrDefault(x => x.Id == id);
         }
 
         // POST api/pdv
         [HttpPost]
-        public CommandResponse Post(JObject pdv)
+        public CommandResponse Post(JObject item)
         {
             var errors = new List<string>();
 
             //Validate mandatory fields
-            if ((int?)pdv["id"] == null || (int?)pdv["id"] < 1) errors.Add("Invalid Id");
-            if (string.IsNullOrEmpty((string)pdv["tradingName"])) errors.Add("Invalid Trading Name");
-            if (string.IsNullOrEmpty((string)pdv["ownerName"])) errors.Add("Invalid Owner Name");
-            if (string.IsNullOrEmpty((string)pdv["document"])) errors.Add("Invalid Document");
-            if ((int?)pdv["deliveryCapacity"] == null) errors.Add("Invalid Capacity");
-            var coverageArea = JsonConvert.DeserializeObject<MultiPolygon>(pdv["coverageArea"]?.ToString());
+            if ((int?)item["id"] == null || (int?)item["id"] < 1) errors.Add("Invalid Id");
+            if (string.IsNullOrEmpty((string)item["tradingName"])) errors.Add("Invalid Trading Name");
+            if (string.IsNullOrEmpty((string)item["ownerName"])) errors.Add("Invalid Owner Name");
+            if (string.IsNullOrEmpty((string)item["document"])) errors.Add("Invalid Document");
+            if ((int?)item["deliveryCapacity"] == null) errors.Add("Invalid Capacity");
+            var coverageArea = JsonConvert.DeserializeObject<MultiPolygon>(item["coverageArea"]?.ToString());
             if (coverageArea == null) errors.Add("Invalid Coverage Area");
-            var address = JsonConvert.DeserializeObject<Point>(pdv["address"]?.ToString());
+            var address = JsonConvert.DeserializeObject<Point>(item["address"]?.ToString());
             if (address == null) errors.Add("Invalid Address");
 
             //Validate existing CNPJ
-            var pdvs = GetPdvs();
-            if (pdvs.Any(x => (string)x["document"] == (string)pdv["document"])) errors.Add("Document must be unique within database");
+            var pdvs = CachedGetPdvs();
+            if (pdvs.Any(x => x.Document == (string)item["document"])) errors.Add("Document must be unique within database");
 
             //Return errors or persist
             if (errors.Count > 0)
             {
-                return new CommandResponse(false, errors, pdv);
+                return new CommandResponse(false, errors, item);
             }
             else
             {
-                pdvs.Add(pdv);
+                var pdv = new Pdv()
+                {
+                    Id = 0, // Avoid explict id inserting in identity column
+                    TradingName = (string)item["tradingName"],
+                    OwnerName = (string)item["ownerName"],
+                    Document = (string)item["document"],
+                    CoverageArea = (string)item["coverageArea"],
+                    Address = (string)item["address"],
+                };
+                pdvs.ToList().Add(pdv);
                 _cache.Set(_pdvsCacheKey,pdvs);
-                return new CommandResponse(true, pdv);
+                _db.Pdvs.Add(pdv);
+                _db.SaveChanges();
+                return new CommandResponse(true, item);
             }
         }
         
         [HttpGet("closest")]
-        public JObject Closest()
+        public Pdv Closest()
         {
-            JObject result = null;
+            Pdv result = null;
 
             //Read data from querystring
             string latitude = Request.Query["lat"];
@@ -87,17 +102,17 @@ namespace ZxBackend.Controllers
             var testPoint = new Point(new Position(lat, lon));
 
             //Query PDV's to find the closest
-            var pdvs = GetPdvs();
-            foreach (JObject pdv in pdvs)
+            var pdvs = CachedGetPdvs();
+            foreach (var pdv in pdvs)
             {
-                var address = JsonConvert.DeserializeObject<Point>(pdv["address"]?.ToString());
+                var address = JsonConvert.DeserializeObject<Point>(pdv.Address);
                 var distance = GeoUtils.GetDistance(address, testPoint);
-                if (result == null || (double)result["distance"] > distance)
+                if (result == null || result.Distance > distance)
                 {
-                    var coverageArea = JsonConvert.DeserializeObject<MultiPolygon>(pdv["coverageArea"]?.ToString());
+                    var coverageArea = JsonConvert.DeserializeObject<MultiPolygon>(pdv.CoverageArea);
                     if (GeoUtils.IsPointInMultiPolygon(testPoint, coverageArea))
                     {
-                        pdv["distance"] = distance;
+                        pdv.Distance = distance;
                         result = pdv;
                     }
                 }
@@ -106,12 +121,11 @@ namespace ZxBackend.Controllers
             return result;
         }
 
-        private JArray GetPdvs()
+        private IEnumerable<Pdv> CachedGetPdvs()
         {
             var cached = _cache.GetOrCreate(_pdvsCacheKey, entry =>
             {
-                var rawObj = JObject.Parse(System.IO.File.ReadAllText(@"pdvs.json"));
-                return (JArray)rawObj["pdvs"];
+                return _db.Set<Pdv>().ToList();
             });
             return cached;
         }
