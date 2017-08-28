@@ -1,8 +1,7 @@
 
 ## Sobre o projeto
 
-Este projeto trata-se de um exercício para atendimento ao desafio [Zx Ventures - Backend](https://github.com/ZXVentures/code-challenge/blob/master/backend.md).
-Na primeira versão enviada, entendi que tratava-se de um exercício de programação para validar conhecimentos técnicos. Havendo entendido que a expectativa na verdade era não somente de um exercício de programação mas na visualização de habilidades de engenharia de software, fiz uma segunda versão mais elaborada.
+Este projeto trata-se de um exercício para atendimento ao desafio [Zx Ventures - Backend](https://github.com/ZXVentures/code-challenge/blob/master/backend.md). Entendi nessa segunda versão que a expectativa era de que o candidato demonstrasse conhecimentos em engenharia de software, portanto desenvolvi uma versão mais elaborada.
 
 ## Sobre a Implementação
 
@@ -82,7 +81,7 @@ Finalizando, acho interessante enumerar que dentre os componentes utilizados, to
 
 ## Bonus: Docker
 
-Por tratar a maior parte do meu tempo de aplicações .Net em ambiente windows, o caminho mais óbvio foi naturalmente apresentar uma solução .Net com recursos do Azure. Ciente de que na Zx a stack é baseada em Python e sem Windows, achei que seria válido aproveitar a possibilidade do .Net Core de rodar em Linux para realizar testes rodando a aplicação desenvolvida em containers Docker. Para minha surpresa, o Visual Studio Community 2017 possui um recurso para adicionar à uma solution existente os arquivos necessários para subir os containers e executa a aplicação finalmente em Docker :
+Por tratar a maior parte do meu tempo de aplicações .Net em ambiente windows, o caminho mais óbvio foi naturalmente apresentar uma solução .Net com recursos do Azure. Ciente de que na Zx a stack é baseada em Python e sem Windows, achei que seria válido aproveitar a possibilidade do .Net Core de rodar em Linux para realizar testes rodando a aplicação desenvolvida em containers Docker. Para minha surpresa, o Visual Studio Community 2017 possui um recurso para adicionar à uma solution existente os arquivos necessários para subir os containers e executar a aplicação finalmente em Docker :
 
 ![Dotnet test](/Documentation/docker-files-generation.PNG)
 
