@@ -1,7 +1,7 @@
 
 ## Sobre o projeto
 
-Este projeto trata-se de um exercício para atendimento ao desafio [Zx Ventures - Backend](https://github.com/ZXVentures/code-challenge/blob/master/backend.md). Entendi nessa segunda versão que a expectativa era de que o candidato demonstrasse conhecimentos em engenharia de software, portanto desenvolvi uma versão mais elaborada.
+Este projeto trata-se de um exercício para atendimento ao desafio [Zx Ventures - Backend](https://github.com/ZXVentures/code-challenge/blob/master/backend.md). Entendi nessa segunda versão que a expectativa era de que o candidato demonstrasse conhecimentos em engenharia de software além da lógica de programação, portanto desenvolvi uma versão mais elaborada demonstrando um ambiente no Azure, recursos de CI/CD, entre outros.
 
 ## Sobre a Implementação
 
